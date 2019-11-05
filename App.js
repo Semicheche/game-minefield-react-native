@@ -6,14 +6,14 @@
  * @flow
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
   Text,
-  StatusBar,
+  Alert,  
 } from 'react-native';
 
 import {
@@ -23,69 +23,84 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import params from './src/params'
+import Field from './src/components/Filed'
+import MineField from './src/components/MineField'
+import { 
+  createMinesdBoard,
+  cloneBoard,
+  openField,
+  hadExplosion,
+  wowGame,
+  showMines
+        } from './src/functions'
 
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
+
+export default class App extends Component {
+
+  constructor(props){
+    super(props)
+    this.state =this.createState()
+  }
+
+  minesAmount = () => {
+    const cols = params.getColumnsAmount()
+    const rows = params.getRowsAmount()
+
+    return Math.ceil(cols * rows * params.dificiltLevel)
+  }
+
+  createState = () => {
+    const cols = params.getColumnsAmount()
+    const rows = params.getRowsAmount()
+
+    return {
+      board: createMinesdBoard(rows, cols, this.minesAmount()),
+      won: false,
+      lost: false,
+    }
+  }
+
+  onOpenField = (row, column) => {
+    const board = cloneBoard(this.state.board)
+    openField(board, row, column)
+    const lost = hadExplosion(board)
+    const won = wowGame(board)
+
+    if (lost){
+      showMines(board)
+      Alert.alert('PERDEUUUUUU!!!!!!!', "Que burro")
+    }
+    if (won) {
+      Alert.alert('Parabens!!!!', 'Voce Venceu!!!!')
+    }
+
+    this.setState({ board, lost, won})
+  }
+ 
+  render() {
+    return (
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle} >Iniciando Mines !!! {params.getRowsAmount()}x{params.getColumnsAmount()}</Text>
+		  <View style={styles.board}>
+			  <MineField board={this.state.board}
+          onOpenField={this.onOpenField}
+        />
+		  </View>
+        </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+	flex: 1,
+	justifyContent: 'flex-end'
+
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  board: {
+	  alignItems: 'center',
+	  backgroundColor: '#AAA'
   },
   sectionTitle: {
     fontSize: 24,
@@ -110,5 +125,3 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 });
-
-export default App;
