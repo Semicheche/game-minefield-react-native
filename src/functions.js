@@ -91,11 +91,20 @@ const wowGame = board => fields(board).filter(pendding).length === 0
 const showMines = board => fields(board).filter(field => field.mined)
         .forEach(field => field.opened = true)
 
+const invertFlag = (board, row, column) =>{
+    const field = board[row][column]
+    field.flagged = !field.flagged
+}
+
+const flagUsed = board => fields(board).filter(field => field.flagged).length
+
 export { 
     createMinesdBoard,
     cloneBoard,
     openField,
     hadExplosion,
     wowGame,
-    showMines
+    showMines,
+    invertFlag,
+    flagUsed,
  }

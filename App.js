@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 
 import {
-  Header,
   LearnMoreLinks,
   Colors,
   DebugInstructions,
@@ -26,15 +25,17 @@ import {
 import params from './src/params'
 import Field from './src/components/Filed'
 import MineField from './src/components/MineField'
+import Header from './src/components/Header'
 import { 
   createMinesdBoard,
   cloneBoard,
   openField,
   hadExplosion,
   wowGame,
-  showMines
+  showMines,
+  invertFlag,
+  flagUsed
         } from './src/functions'
-
 
 export default class App extends Component {
 
@@ -51,8 +52,8 @@ export default class App extends Component {
   }
 
   createState = () => {
-    const cols = params.getColumnsAmount()
-    const rows = params.getRowsAmount()
+    const cols = params.getColumnsAmount() -1
+    const rows = params.getRowsAmount() -1
 
     return {
       board: createMinesdBoard(rows, cols, this.minesAmount()),
@@ -77,16 +78,30 @@ export default class App extends Component {
 
     this.setState({ board, lost, won})
   }
+
+  onSelectField = (row, column) =>{
+    const board = cloneBoard(this.state.board)
+    invertFlag(board, row, column)
+    const won = wowGame(board)
+
+    if (won) {
+      Alert.alert('Parabens!!!!', 'Voce Venceu!!!!')
+    }
+
+    this.setState({ board, won })
+  }
  
   render() {
     return (
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle} >Iniciando Mines !!! {params.getRowsAmount()}x{params.getColumnsAmount()}</Text>
-		  <View style={styles.board}>
-			  <MineField board={this.state.board}
-          onOpenField={this.onOpenField}
-        />
-		  </View>
+        <View style={styles.container}>
+          <Header flagsLeft={this.minesAmount() - flagUsed(this.state.board)}
+          onNewGame={() => this.setState(this.createState()) }/>
+          <View style={styles.board}>
+            <MineField board={this.state.board}
+              onOpenField={this.onOpenField}
+              onSelectField={this.onSelectField}
+            />
+          </View>
         </View>
     );
   }
