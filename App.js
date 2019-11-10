@@ -26,6 +26,7 @@ import params from './src/params'
 import Field from './src/components/Filed'
 import MineField from './src/components/MineField'
 import Header from './src/components/Header'
+import LevelSelection from './src/screens/LevelSelection'
 import { 
   createMinesdBoard,
   cloneBoard,
@@ -48,7 +49,7 @@ export default class App extends Component {
     const cols = params.getColumnsAmount()
     const rows = params.getRowsAmount()
 
-    return Math.ceil(cols * rows * params.dificiltLevel)
+    return Math.ceil(cols * rows * params.difficultLevel)
   }
 
   createState = () => {
@@ -59,6 +60,7 @@ export default class App extends Component {
       board: createMinesdBoard(rows, cols, this.minesAmount()),
       won: false,
       lost: false,
+      showLevelSelection: false,
     }
   }
 
@@ -90,12 +92,21 @@ export default class App extends Component {
 
     this.setState({ board, won })
   }
+
+  onLevelSelected = level => {
+    params.difficultLevel = level
+    this.setState(this.createState())
+  }
  
   render() {
     return (
         <View style={styles.container}>
+          <LevelSelection isVisible={this.state.showLevelSelection}
+            onLevelSelected={this.onLevelSelected}
+            onCancel={() => this.setState({ showLevelSelection: false })}></LevelSelection>
           <Header flagsLeft={this.minesAmount() - flagUsed(this.state.board)}
-          onNewGame={() => this.setState(this.createState()) }/>
+          onNewGame={() => this.setState(this.createState())}
+          onFlagPress={() => this.setState({showLevelSelection: true })}/>
           <View style={styles.board}>
             <MineField board={this.state.board}
               onOpenField={this.onOpenField}
@@ -115,28 +126,6 @@ const styles = StyleSheet.create({
   },
   board: {
 	  alignItems: 'center',
-	  backgroundColor: '#AAA'
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+    backgroundColor: '#AAA',
+  }
 });
